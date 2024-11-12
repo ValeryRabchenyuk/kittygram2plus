@@ -126,6 +126,12 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#  Разрешения на уровне проекта. 4 варианта доступа: 
+# AllowAny, 
+# IsAuthenticated — только для аутентифицированные пользователей, 
+# IsAuthenticatedOrReadOnly — + анонимы могут делать запросы на чтение; 
+# IsAdminUser — для адиминов, у которых свойство user.is_staff = True
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated', 
@@ -134,7 +140,41 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+
+"""
+Ограничения TROTLING на уровне проекта устанавливаются в файле settings.py:
+в словарь REST_FRAMEWORK необходимо добавить параметры DEFAULT_THROTTLE_CLASSES и DEFAULT_THROTTLE_RATES.
+
+Имя user предустановлено в классе UserRateThrottle, а anon — в AnonRateThrottle.
+
+Количество запросов указывается целым числом, период времени указывается как second, minute, hour или day. 
+
+"""
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+
+                # Можно не подключать класс AnonRateThrottle глобально.
+                # Подключим его только в тех view-классах или вьюсетах,
+                # где надо установить лимиты для анонимов
+                # В случае с view-классами или вьюсетами в тело класса добавляют атрибут throttle_classes
+
+                # Но сами лимиты установим здесь, и они будут доступны из всего кода проекта
+
+                
+        'rest_framework.throttling.ScopedRateThrottle',         Собственный лимит запросов 
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10000/day',  # Лимит для UserRateThrottle
+        'anon': '1000/day',  # Лимит для AnonRateThrottle
+        
+                # Имена (ключи) для scope придумывает разработчик, 
+                # установим кастомный лимит 1 запрос в минуту
+        'low_request': '1/minute',
+    }
 }
+
+
 
 SIMPLE_JWT = {
    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
