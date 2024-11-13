@@ -172,6 +172,16 @@ REST_FRAMEWORK = {
                 # установим кастомный лимит 1 запрос в минуту
         'low_request': '1/minute',
     }
+
+    # ПАГИНАЦИЯ ВЫДАЧИ
+
+    # Пагинация «из коробки» будет работать только для дженериков и вьюсетов
+
+    # Для view-классов пагинацию настраивают иначе; детали реализации можно подсмотреть в исходном коде классов mixins.ListModelMixin и generics.GenericAPIView.
+    # приоритет у настроек класса
+
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
 }
 
 
